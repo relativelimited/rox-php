@@ -14,8 +14,8 @@ use Rox\Server\Rox;
 use Rox\Server\RoxOptions;
 use Rox\Server\RoxOptionsBuilder;
 
-const DEFAULT_API_KEY = '5b3356d00d81206da3055bc0';
-const DEFAULT_DEV_MODE_KEY = '01fcd0d21eeaed9923dff6d8';
+const DEFAULT_API_KEY = '5e6a3533d3319d76d1ca33fd';
+const DEFAULT_DEV_MODE_KEY = '297c23e7fcb68e54c513dcca';
 
 require __DIR__ . '/vendor/autoload.php';
 
