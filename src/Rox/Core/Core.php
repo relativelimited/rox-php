@@ -57,6 +57,7 @@ use Rox\Core\Roxx\ParserInterface;
 use Rox\Core\Roxx\PropertiesExtensions;
 use Rox\Core\Security\APIKeyVerifier;
 use Rox\Core\Security\SignatureVerifier;
+use Rox\Core\XPack\Analytics\AnalyticsClient;
 use Rox\Core\XPack\Client\XBUID;
 use Rox\Core\XPack\Configuration\XConfigurationFetchedInvoker;
 use Rox\Core\XPack\Network\StateSender;
@@ -240,7 +241,8 @@ class Core
             $this->_stateSender = new StateSender($stateSenderHttpClient, $deviceProperties, $this->_flagRepository, $this->_customPropertyRepository);
             $this->_configurationFetchedInvoker = new XConfigurationFetchedInvoker($this);
             $this->_configurationFetcher = new ConfigurationFetcher($httpClient, $buid, $deviceProperties, $this->_configurationFetchedInvoker, $this->_errorReporter);
-            $this->_impressionInvoker = new XImpressionInvoker($this->_internalFlags, $this->_customPropertyRepository, null);
+            $this->_impressionInvoker = new XImpressionInvoker($this->_internalFlags, $this->_customPropertyRepository,
+                new AnalyticsClient($this->_deviceProperties, $httpClientFactory->createHttpClient()));
             $signature = new XSignatureVerifier();
             $apiKeyVerifier = new XAPIKeyVerifier($sdkSettings);
         }
@@ -393,6 +395,7 @@ class Core
         $httpClientOptions->setLogCacheHitsAndMisses($options
             ? $options->isLogCacheHitsAndMisses()
             : false);
+        $httpClientOptions->setUserAgent("rox-php/{$this->_deviceProperties->getLibVersion()}");
         return new GuzzleHttpClientFactory($httpClientOptions);
     }
 

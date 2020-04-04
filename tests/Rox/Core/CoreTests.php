@@ -83,7 +83,10 @@ class CoreTests extends RoxTestCase
             ->andReturn(null)
             ->getMock();
 
-        $mockedDeviceProps = \Mockery::mock(DevicePropertiesInterface::class);
+        $mockedDeviceProps = \Mockery::mock(DevicePropertiesInterface::class)
+            ->shouldReceive('getLibVersion')
+            ->andReturn("1.0.0")
+            ->getMock();
 
         $this->_mockedOptions
             ->shouldReceive('getRoxyURL')
@@ -103,7 +106,10 @@ class CoreTests extends RoxTestCase
             ->andReturn('')
             ->getMock();
 
-        $mockedDeviceProps = \Mockery::mock(DevicePropertiesInterface::class);
+        $mockedDeviceProps = \Mockery::mock(DevicePropertiesInterface::class)
+            ->shouldReceive('getLibVersion')
+            ->andReturn("1.0.0")
+            ->getMock();
 
         $this->_mockedOptions
             ->shouldReceive('getRoxyURL')
@@ -123,7 +129,10 @@ class CoreTests extends RoxTestCase
             ->andReturn('aaaaaaaaaaaaaaaaaaaaaaag')
             ->getMock();
 
-        $mockedDeviceProps = \Mockery::mock(DevicePropertiesInterface::class);
+        $mockedDeviceProps = \Mockery::mock(DevicePropertiesInterface::class)
+            ->shouldReceive('getLibVersion')
+            ->andReturn("1.0.0")
+            ->getMock();
 
         $this->_mockedOptions
             ->shouldReceive('getRoxyURL')
@@ -141,7 +150,10 @@ class CoreTests extends RoxTestCase
             ->andReturn('doesn\'t matter')
             ->getMock();
 
-        $mockedDeviceProps = \Mockery::mock(DevicePropertiesInterface::class);
+        $mockedDeviceProps = \Mockery::mock(DevicePropertiesInterface::class)
+            ->shouldReceive('getLibVersion')
+            ->andReturn("1.0.0")
+            ->getMock();
 
         $c = new Core();
         $c->setup($this->_mockedSdkSettings, $mockedDeviceProps, $this->_mockedOptions);

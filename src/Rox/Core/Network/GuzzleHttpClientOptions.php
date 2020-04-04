@@ -27,6 +27,11 @@ class GuzzleHttpClientOptions
     private $_noCachePaths = [];
 
     /**
+     * @var string $_userAgent
+     */
+    private $_userAgent;
+
+    /**
      * GuzzleHttpClientOptions constructor.
      */
     public function __construct()
@@ -107,6 +112,24 @@ class GuzzleHttpClientOptions
     public function setNoCachePaths(array $noCachePaths)
     {
         $this->_noCachePaths = $noCachePaths;
+        return $this;
+    }
+
+    /**
+     * @return string
+     */
+    public function getUserAgent()
+    {
+        return $this->_userAgent;
+    }
+
+    /**
+     * @param string $userAgent
+     * @return GuzzleHttpClientOptions
+     */
+    public function setUserAgent($userAgent)
+    {
+        $this->_userAgent = $userAgent;
         return $this;
     }
 }

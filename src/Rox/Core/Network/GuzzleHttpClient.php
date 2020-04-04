@@ -8,8 +8,6 @@ use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\Psr7\Request;
 use GuzzleHttp\Psr7\Uri;
 use GuzzleHttp\RequestOptions;
-use Psr\Http\Message\RequestInterface;
-use Psr\Http\Message\ResponseInterface;
 use Psr\Log\LoggerInterface;
 use Rox\Core\Logging\LoggerFactory;
 
@@ -52,6 +50,11 @@ class GuzzleHttpClient implements HttpClientInterface
             }
             $this->_logCacheHitsAndMisses = $options->isLogCacheHitsAndMisses();
             $this->_noCachePaths = $options->getNoCachePaths();
+            if ($options->getUserAgent()) {
+                $config['headers'] = [
+                    'User-Agent' => $options->getUserAgent()
+                ];
+            }
         }
 
         $this->_client = new Client($config);
@@ -68,40 +71,9 @@ class GuzzleHttpClient implements HttpClientInterface
         if ($requestData->getQueryParams() != null) {
             $uri = Uri::withQueryValues($uri, $requestData->getQueryParams());
         }
-        $response = $this->sendRequest(new Request('GET', $uri));
-        return new Psr7ResponseWrapper($response);
-    }
-
-    /**
-     * @param RequestData $requestData
-     * @return HttpResponseInterface
-     */
-    function sendPost(RequestData $requestData)
-    {
-        return $this->postJson($requestData->getUrl(), $requestData->getQueryParams());
-    }
-
-    /**
-     * @param string $uri
-     * @param array $data
-     * @return HttpResponseInterface
-     */
-    function postJson($uri, array $data)
-    {
-        $uriToSend = new Uri($uri);
-        return new Psr7ResponseWrapper($this->_client->post($uriToSend, [
-            RequestOptions::JSON => $data
-        ]));
-    }
-
-    /**
-     * @param RequestInterface $request
-     * @return ResponseInterface
-     */
-    private function sendRequest($request)
-    {
         try {
-            $noCache = $this->_isNoCacheRequest($request);
+            $request = new Request('GET', $uri);
+            $noCache = $this->_isNoCacheRequest($uri);
             if ($noCache) {
                 // Don't use Kevinrob/GuzzleCache lib constants here to make it optional in composer.json
                 $request = $request->withHeader('X-Kevinrob-GuzzleCache-ReValidation', true);
@@ -121,17 +93,62 @@ class GuzzleHttpClient implements HttpClientInterface
                     }
                 }
             }
-            return $response;
+            return new Psr7ResponseWrapper($response);
         } catch (GuzzleException $e) {
-            throw new HttpClientException("Failed to send request to {$request->getUri()}", $e);
+            return $this->_handleError($request->getUri(), $e);
         }
     }
 
-    private function _isNoCacheRequest(RequestInterface $request)
+    /**
+     * @param RequestData $requestData
+     * @return HttpResponseInterface
+     */
+    function sendPost(RequestData $requestData)
+    {
+        return $this->postJson($requestData->getUrl(), $requestData->getQueryParams());
+    }
+
+    /**
+     * @param string $uri
+     * @param array $data
+     * @return HttpResponseInterface
+     */
+    function postJson($uri, array $data)
+    {
+        try {
+            return new Psr7ResponseWrapper($this->_client->post(new Uri($uri), [
+                RequestOptions::JSON => $data
+            ]));
+        } catch (GuzzleException $e) {
+            $this->_log->error("Failed to send data to ${uri}: {$e->getMessage()}", [
+                'exception' => $e
+            ]);
+            return new HttpErrorResponse($e->getCode(), $e->getMessage());
+        }
+    }
+
+    /**
+     * @param string $uri
+     * @param GuzzleException $e
+     * @return HttpResponseInterface
+     */
+    private function _handleError($uri, GuzzleException $e)
+    {
+        $this->_log->error("Failed to send data to ${uri}: {$e->getMessage()}", [
+            'exception' => $e
+        ]);
+        return new HttpErrorResponse($e->getCode(), $e->getMessage());
+    }
+
+    /**
+     * @param string $uri
+     * @return bool
+     */
+    private function _isNoCacheRequest($uri)
     {
         return is_array($this->_noCachePaths) &&
-            count(array_filter($this->_noCachePaths, function ($path) use ($request) {
-                return strpos((string)$request->getUri(), $path) !== false;
+            count(array_filter($this->_noCachePaths, function ($path) use ($uri) {
+                return strpos($uri, $path) !== false;
             })) > 0;
     }
 }
