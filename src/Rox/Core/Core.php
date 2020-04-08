@@ -242,7 +242,7 @@ class Core
             $this->_configurationFetchedInvoker = new XConfigurationFetchedInvoker($this);
             $this->_configurationFetcher = new ConfigurationFetcher($httpClient, $buid, $deviceProperties, $this->_configurationFetchedInvoker, $this->_errorReporter);
             $this->_impressionInvoker = new XImpressionInvoker($this->_internalFlags, $this->_customPropertyRepository,
-                new AnalyticsClient($this->_deviceProperties, $httpClientFactory->createHttpClient()));
+                new AnalyticsClient($this->_deviceProperties, $this->_internalFlags, $httpClientFactory->createHttpClient()));
             $signature = new XSignatureVerifier();
             $apiKeyVerifier = new XAPIKeyVerifier($sdkSettings);
         }

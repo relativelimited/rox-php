@@ -4,6 +4,7 @@ namespace Rox\Core\XPack\Analytics;
 
 use Psr\Log\LoggerInterface;
 use Rox\Core\Client\DevicePropertiesInterface;
+use Rox\Core\Client\InternalFlagsInterface;
 use Rox\Core\Consts\Environment;
 use Rox\Core\Consts\PropertyType;
 use Rox\Core\Logging\LoggerFactory;
@@ -51,21 +52,25 @@ class AnalyticsClient implements ClientInterface
     /**
      * AnalyticsClient constructor.
      *
-     * @param DevicePropertiesInterface $_deviceProperties
+     * @param DevicePropertiesInterface $deviceProperties
+     * @param InternalFlagsInterface $internalFlags
      * @param HttpClientInterface $httpClient
      */
     public function __construct(
-        DevicePropertiesInterface $_deviceProperties,
+        DevicePropertiesInterface $deviceProperties,
+        InternalFlagsInterface $internalFlags,
         HttpClientInterface $httpClient)
     {
-        $this->_deviceProperties = $_deviceProperties;
+        $this->_deviceProperties = $deviceProperties;
         $this->_httpClient = $httpClient;
         $this->_log = LoggerFactory::getInstance()->createLogger(self::class);
-        if (isset($_ENV["rox.analytics.max_queue_size"])) {
-            $this->_max_queue_size = (int)$_ENV["rox.analytics.max_queue_size"];
+        $maxQueueSize = $internalFlags->getIntValue("rox.internal.analytics.max_queue_size");
+        if ($maxQueueSize > 0) {
+            $this->_max_queue_size = $maxQueueSize;
         }
-        if (isset($_ENV["rox.analytics.max_batch_size"])) {
-            $this->_batch_size = (int)$_ENV["rox.analytics.max_batch_size"];
+        $batchSize = $internalFlags->getIntValue("rox.internal.analytics.batch_size");
+        if ($batchSize > 0) {
+            $this->_batch_size = $batchSize;
         }
     }
 
