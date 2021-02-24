@@ -29,7 +29,7 @@
     "php": "^7.4|8.0.*",
     "ext-json": "*",
     "ext-openssl": "*",
-    "guzzlehttp/guzzle": "7",
+    "guzzlehttp/guzzle": "^7",
     "psr/http-message": "^1.0",
     "psr/log": "^1.1",
     "ramsey/uuid": "^3.9",
